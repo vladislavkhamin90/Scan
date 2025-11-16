@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/_back"
+    android:gravity="center"
+    tools:context=".ScannerFragment">
+
+    <Button
+        android:id="@+id/scan_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="@drawable/corners_button"
+        android:fontFamily="@font/adlam_display"
+        android:text="Сканировать QR-код"
+        android:textColor="@color/colorPrimary"
+        android:textStyle="bold"/>
+</LinearLayout>

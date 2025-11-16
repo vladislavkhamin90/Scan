@@ -1,0 +1,14 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_scanner"
+        android:icon="@drawable/scan"
+        android:title="Сканер" />
+    <item
+        android:id="@+id/nav_search"
+        android:icon="@drawable/search"
+        android:title="Поиск" />
+    <item
+        android:id="@+id/nav_results"
+        android:icon="@drawable/result"
+        android:title="Результаты" />
+</menu>

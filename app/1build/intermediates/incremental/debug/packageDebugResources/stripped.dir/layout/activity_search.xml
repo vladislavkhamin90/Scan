@@ -1,0 +1,78 @@
+
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".SearchActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/_back"
+        android:paddingBottom="50dp"
+        >
+
+        <EditText
+            android:id="@+id/ed_search"
+            android:layout_width="290dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="50dp"
+            android:background="@drawable/edit_rect"
+            android:inputType="text"
+            android:textColor="@color/colorPrimary"
+            android:hint="Введите идентификатор..."
+            android:textColorHint="@color/material_dynamic_neutral80"/>
+
+        <Button
+            android:id="@+id/search_button"
+            android:layout_width="180dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/corners_button"
+            android:fontFamily="@font/adlam_display"
+            android:gravity="center"
+            android:onClick="search"
+            android:text="Найти"
+            android:textColor="@color/colorPrimary"
+            android:textStyle="normal|bold" />
+        <TextView
+            android:id="@+id/search_result"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="10dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_weight="4"
+            android:textColor="@color/colorPrimary"
+            android:padding="10dp"
+            android:textSize="20dp"
+            android:background="@drawable/text_view"
+            >
+        </TextView>
+
+        <Button
+            android:id="@+id/Back_button"
+            android:layout_width="180dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:layout_weight="0.005"
+            android:background="@drawable/corners_button"
+            android:fontFamily="@font/adlam_display"
+            android:gravity="center"
+                        android:onClick="comeBack"
+            android:text="Назад"
+            android:textColor="@color/colorPrimary"
+            android:textStyle="normal|bold" />
+
+
+
+    </LinearLayout>
+
+</ScrollView>

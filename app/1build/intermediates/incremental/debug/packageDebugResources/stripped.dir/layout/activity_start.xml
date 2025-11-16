@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:fillViewport="true"
+    tools:context=".StartActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/_back"
+        >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="30dp"
+            android:fontFamily="@font/adlam_display"
+            android:text="Введите пароль"
+            android:textColor="@color/colorPrimary"
+            android:textSize="25sp"
+            android:textStyle="normal|bold">
+
+        </TextView>
+
+        <EditText
+            android:id="@+id/ed_pass"
+            android:layout_width="240dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="50dp"
+            android:layout_gravity="center"
+            android:background="@drawable/edit_rect"
+            android:inputType="numberPassword"
+            android:textColor="@color/colorPrimary"
+            />
+
+        <Button
+            android:id="@+id/button3"
+            android:layout_width="180dp"
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:layout_marginTop="30dp"
+            android:layout_gravity="center"
+            android:background="@drawable/corners_button"
+            android:text="Вход"
+            android:fontFamily="@font/adlam_display"
+            android:textStyle="normal|bold"
+            android:textColor="@color/colorPrimary"
+            android:onClick="start"/>
+        <TextView
+            android:id="@+id/previev_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="30dp"
+            android:fontFamily="@font/adlam_display"
+            android:text=""
+            android:textColor="@color/colorPrimary"
+            android:textSize="25sp"
+            android:textStyle="normal|bold">
+
+        </TextView>
+
+
+
+    </LinearLayout>
+</ScrollView>
+
+
+

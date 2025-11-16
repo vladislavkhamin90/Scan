@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".SearchFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/_back"
+        android:paddingBottom="50dp">
+
+        <EditText
+            android:id="@+id/ed_search"
+            android:layout_width="290dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="50dp"
+            android:background="@drawable/edit_rect"
+            android:hint="Введите идентификатор..."
+            android:inputType="text"
+            android:textColor="@color/colorPrimary"
+            android:textColorHint="@color/material_dynamic_neutral80"/>
+
+        <Button
+            android:id="@+id/search_button"
+            android:layout_width="180dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/corners_button"
+            android:fontFamily="@font/adlam_display"
+            android:gravity="center"
+            android:text="Найти"
+            android:textColor="@color/colorPrimary"
+            android:textStyle="normal|bold"/>
+
+        <TextView
+            android:id="@+id/search_result"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="10dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_weight="4"
+            android:background="@drawable/text_view"
+            android:padding="10dp"
+            android:textColor="@color/colorPrimary"
+            android:textSize="20dp"/>
+    </LinearLayout>
+</ScrollView>
