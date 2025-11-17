@@ -1,4 +1,4 @@
-package com.example.scan
+package com.example.scan.ui.fragments
 
 import android.Manifest
 import android.app.AlertDialog
@@ -11,19 +11,31 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import com.example.scan.MainActivity
 import com.example.scan.databinding.FragmentScannerBinding
+import com.example.scan.model.DataRow
+import com.example.scan.viewmodel.ScanState
+import com.example.scan.viewmodel.ScannerViewModel
+import com.example.scan.viewmodel.ScannerViewModelFactory
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 class ScannerFragment : Fragment() {
     private var _binding: FragmentScannerBinding? = null
     private val binding get() = _binding!!
-    private lateinit var dataRows: List<DataRow>
+
+    private val scannerViewModel: ScannerViewModel by viewModels {
+        ScannerViewModelFactory((requireActivity() as MainActivity).repository)
+    }
 
     private val barcodeLauncher = registerForActivityResult(ScanContract()) { result ->
         if (result.contents != null) {
-            val scanResult = cleanScanResult(result.contents)
-            performSearch(scanResult)
+            val scanResult = result.contents
+            scannerViewModel.processScanResult(scanResult)
         } else {
             (activity as? MainActivity)?.supportFragmentManager?.popBackStack()
         }
@@ -53,14 +65,48 @@ class ScannerFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        dataRows = (activity as MainActivity).getDataRows()
+        setupObservers()
+        checkDataAndPermissions()
+    }
 
-        if (dataRows.isEmpty()) {
+    private fun setupObservers() {
+        lifecycleScope.launch {
+            scannerViewModel.dataRows.collect { dataRows ->
+                if (dataRows.isEmpty()) {
+                    showAlert("Файл не загружен", "Сначала выберите файл с данными") {
+                        (activity as? MainActivity)?.supportFragmentManager?.popBackStack()
+                    }
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            scannerViewModel.scanResult.collect { state ->
+                when (state) {
+                    is ScanState.Error -> {
+                        showAlert("Ошибка", state.message) {
+                            launchScanner()
+                        }
+                    }
+                    is ScanState.SingleResult -> {
+                        showResult(state.dataRow)
+                    }
+                    is ScanState.MultipleResults -> {
+                        showMultipleResultsDialog(state.results)
+                    }
+                    else -> {}
+                }
+            }
+        }
+    }
+
+    private fun checkDataAndPermissions() {
+        if (scannerViewModel.dataRows.value?.isNotEmpty() == true) {
+            checkCameraPermission()
+        } else {
             showAlert("Файл не загружен", "Сначала выберите файл с данными") {
                 (activity as? MainActivity)?.supportFragmentManager?.popBackStack()
             }
-        } else {
-            checkCameraPermission()
         }
     }
 
@@ -90,44 +136,6 @@ class ScannerFragment : Fragment() {
         barcodeLauncher.launch(options)
     }
 
-    private fun cleanScanResult(scanResult: String): String {
-        var cleaned = scanResult.replace(";", "")
-        cleaned = cleaned.trim()
-        Log.d("ScannerFragment", "Cleaned scan result: '$cleaned' (original: '$scanResult')")
-        return cleaned
-    }
-
-    private fun performSearch(scanResult: String) {
-        if (scanResult.isBlank()) {
-            showAlert("Ошибка", "Код не распознан") {
-                launchScanner()
-            }
-            return
-        }
-
-        Log.d("ScannerFragment", "Searching for scanned: '$scanResult'")
-        val results = dataRows.filter { it.containsText(scanResult) }
-
-        when {
-            results.isEmpty() -> {
-                showAlert("Ничего не найдено", "По отсканированному коду '$scanResult' ничего не найдено") {
-                    launchScanner()
-                }
-            }
-            results.size == 1 -> {
-                showResult(results.first())
-            }
-            results.size <= 10 -> {
-                showMultipleResultsDialog(results)
-            }
-            else -> {
-                showAlert("Слишком много результатов", "Найдено ${results.size} совпадений. Уточните запрос.") {
-                    launchScanner()
-                }
-            }
-        }
-    }
-
     private fun showResult(dataRow: DataRow) {
         val formattedResult = dataRow.getFormattedResult()
         (activity as? MainActivity)?.setLastSearchResult(formattedResult)
@@ -136,8 +144,8 @@ class ScannerFragment : Fragment() {
             ResultsFragment.newInstance(formattedResult)
         )
         (activity as MainActivity).findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(
-            R.id.bottom_navigation
-        )?.selectedItemId = R.id.nav_results
+            com.example.scan.R.id.bottom_navigation
+        )?.selectedItemId = com.example.scan.R.id.nav_results
     }
 
     private fun showMultipleResultsDialog(results: List<DataRow>) {

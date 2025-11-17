@@ -1,4 +1,4 @@
-package com.example.scan
+package com.example.scan.ui.fragments
 
 import android.os.Bundle
 import android.util.Log
@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.example.scan.MainActivity
 import com.example.scan.databinding.FragmentResultsBinding
 
 class ResultsFragment : Fragment() {

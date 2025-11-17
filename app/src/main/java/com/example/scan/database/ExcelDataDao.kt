@@ -1,4 +1,4 @@
-package com.example.scan
+package com.example.scan.database
 
 import androidx.room.Dao
 import androidx.room.Insert

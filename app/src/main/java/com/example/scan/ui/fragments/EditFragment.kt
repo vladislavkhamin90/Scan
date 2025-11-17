@@ -1,4 +1,4 @@
-package com.example.scan
+package com.example.scan.ui.fragments
 
 import android.os.Bundle
 import android.os.Environment
@@ -10,6 +10,7 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import com.example.scan.MainActivity
 import com.example.scan.databinding.FragmentEditBinding
 import java.io.*
 import java.text.SimpleDateFormat

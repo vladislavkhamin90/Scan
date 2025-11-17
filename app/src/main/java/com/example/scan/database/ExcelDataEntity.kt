@@ -1,4 +1,4 @@
-package com.example.scan
+package com.example.scan.database
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

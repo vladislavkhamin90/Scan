@@ -1,6 +1,7 @@
-package com.example.scan
+package com.example.scan.utils
 
 import android.util.Log
+import com.example.scan.model.DataRow
 import org.apache.poi.ss.usermodel.WorkbookFactory
 import org.apache.poi.ss.usermodel.DataFormatter
 import java.io.InputStream
@@ -35,11 +36,13 @@ object ExcelDataFileReader {
                         val searchText = values.firstOrNull() ?: ""
                         val dataMap = headers.zip(values).toMap()
 
-                        rows.add(DataRow(
+                        rows.add(
+                            DataRow(
                             searchText = searchText,
                             rowData = dataMap,
                             fileName = fileName
-                        ))
+                        )
+                        )
                     }
                 }
             }

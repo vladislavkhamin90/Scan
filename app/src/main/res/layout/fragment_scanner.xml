@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:background="@drawable/_back"
     android:gravity="center"
-    tools:context=".ScannerFragment">
+    tools:context=".ui.fragments.ScannerFragment">
 
     <ProgressBar
         android:layout_width="wrap_content"

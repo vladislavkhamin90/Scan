@@ -7,21 +7,32 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.room.Room
 import com.example.scan.databinding.ActivityMainBinding
+import com.example.scan.database.AppDatabase
+import com.example.scan.repository.DataRepository
+import com.example.scan.ui.fragments.ResultsFragment
+import com.example.scan.ui.fragments.ScannerFragment
+import com.example.scan.ui.fragments.SearchFragment
+import com.example.scan.viewmodel.MainViewModel
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var database: AppDatabase
-    private lateinit var excelDataDao: ExcelDataDao
-    private var dataRows: List<DataRow> = emptyList()
+    lateinit var repository: DataRepository
+
+    private val mainViewModel: MainViewModel by viewModels {
+        MainViewModelFactory(repository)
+    }
+
     private var lastSearchResult: String? = null
 
     private val filePickerLauncher = registerForActivityResult(
@@ -30,7 +41,7 @@ class MainActivity : AppCompatActivity() {
         if (result.resultCode == RESULT_OK) {
             result.data?.data?.let { uri ->
                 val fileName = getFileName(uri) ?: "unknown_file"
-                loadDataFromUri(uri, fileName)
+                mainViewModel.loadDataFromUri(this, uri, fileName)
             }
         }
     }
@@ -46,18 +57,46 @@ class MainActivity : AppCompatActivity() {
             AppDatabase::class.java,
             "excel_database"
         ).build()
-        excelDataDao = database.excelDataDao()
 
-        checkExistingData()
+        repository = DataRepository(database.excelDataDao())
 
+        setupObservers()
         setupBottomNavigation()
+    }
+
+    private fun setupObservers() {
+        lifecycleScope.launch {
+            mainViewModel.loadingState.collect { state: com.example.scan.repository.LoadingState ->
+                when (state) {
+                    is com.example.scan.repository.LoadingState.Success -> {
+                        if (state.count > 0) {
+                            showBottomNavigation(true)
+                            replaceFragment(SearchFragment())
+                            Toast.makeText(
+                                this@MainActivity,
+                                "Загружено ${state.count} записей",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                    is com.example.scan.repository.LoadingState.Error -> {
+                        Toast.makeText(
+                            this@MainActivity,
+                            state.message,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    else -> {}
+                }
+            }
+        }
     }
 
     private fun setupBottomNavigation() {
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             when(item.itemId) {
                 R.id.nav_scanner -> {
-                    if (dataRows.isNotEmpty()) {
+                    if (mainViewModel.dataRows.value?.isNotEmpty() == true) {
                         replaceFragment(ScannerFragment())
                     } else {
                         showFilePicker()
@@ -65,7 +104,7 @@ class MainActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_search -> {
-                    if (dataRows.isNotEmpty()) {
+                    if (mainViewModel.dataRows.value?.isNotEmpty() == true) {
                         replaceFragment(SearchFragment())
                     } else {
                         showFilePicker()
@@ -85,83 +124,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun checkExistingData() {
-        lifecycleScope.launch {
-            try {
-                val existingData = loadDataFromDatabase()
-                if (existingData.isNotEmpty()) {
-                    dataRows = existingData
-                    replaceFragment(SearchFragment())
-                    showBottomNavigation(true)
-                    Log.d("MainActivity", "Loaded ${dataRows.size} rows from database")
-                } else {
-                    showFilePicker()
-                }
-            } catch (e: Exception) {
-                Log.e("MainActivity", "Error loading from database", e)
-                showFilePicker()
-            }
-        }
-    }
-
-    private suspend fun loadDataFromDatabase(): List<DataRow> {
-        val entities = excelDataDao.getAll()
-        return entities.map { entity ->
-            DataRow(
-                searchText = entity.searchText,
-                rowData = Json.decodeFromString(entity.value),
-                fileName = entity.fileName
-            )
-        }
-    }
-
-    private suspend fun saveDataToDatabase(data: List<DataRow>, fileName: String) {
-        val entities = data.map { dataRow ->
-            ExcelDataEntity(
-                searchText = dataRow.searchText,
-                fileName = fileName,
-                value = Json.encodeToString(dataRow.rowData)
-            )
-        }
-        excelDataDao.deleteAll()
-        excelDataDao.insertAll(entities)
-    }
-
-    private fun loadDataFromUri(uri: Uri, fileName: String) {
-        lifecycleScope.launch {
-            try {
-                val fileData = DataFileReader.readDataFromUri(this@MainActivity, uri, fileName)
-                if (fileData.isNotEmpty()) {
-                    saveDataToDatabase(fileData, fileName)
-                    dataRows = fileData
-                    showBottomNavigation(true)
-                    replaceFragment(SearchFragment())
-
-                    Toast.makeText(
-                        this@MainActivity,
-                        "Загружено ${fileData.size} записей",
-                        Toast.LENGTH_SHORT
-                    ).show()
-
-                    Log.d("MainActivity", "Saved ${fileData.size} rows to database")
-                } else {
-                    Toast.makeText(
-                        this@MainActivity,
-                        "Файл пуст или не содержит данных",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            } catch (e: Exception) {
-                Log.e("MainActivity", "Error loading data from file", e)
-                Toast.makeText(
-                    this@MainActivity,
-                    "Ошибка загрузки файла",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
-    }
-
     fun replaceFragment(fragment: Fragment) {
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, fragment)
@@ -175,7 +137,9 @@ class MainActivity : AppCompatActivity() {
         Log.d("MainActivity", "Last search result saved: ${result.take(50)}...")
     }
 
-    fun getDataRows(): List<DataRow> = dataRows
+    fun getDataRows(): List<com.example.scan.model.DataRow> {
+        return mainViewModel.dataRows.value ?: emptyList()
+    }
 
     fun showBottomNavigation(show: Boolean) {
         binding.bottomNavigation.visibility = if (show) View.VISIBLE else View.GONE
@@ -217,5 +181,15 @@ class MainActivity : AppCompatActivity() {
             Log.e("MainActivity", "Error getting file name", e)
             null
         }
+    }
+}
+
+class MainViewModelFactory(private val repository: DataRepository) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return MainViewModel(repository) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
