@@ -63,3 +63,10 @@
 - **Асинхронность**: Kotlin Coroutines
 - **Навигация**: Fragment + BottomNavigationView
 - **Сборка**: Gradle с Kotlin DSL
+
+## Скриншоты
+
+<img width="440" height="938" alt="изображение" src="https://github.com/user-attachments/assets/416486ab-ed8a-4e45-8bbd-010897ab5f71" /> <img width="442" height="934" alt="изображение" src="https://github.com/user-attachments/assets/bcac9264-d492-4d4a-bf05-46acaf922843" />
+
+
+
